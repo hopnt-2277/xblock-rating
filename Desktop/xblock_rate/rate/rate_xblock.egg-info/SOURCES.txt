@@ -1,0 +1,13 @@
+setup.py
+rate/__init__.py
+rate/rate.py
+rate/static/README.txt
+rate/static/css/rate.css
+rate/static/html/rate.html
+rate/static/js/src/rate.js
+rate_xblock.egg-info/PKG-INFO
+rate_xblock.egg-info/SOURCES.txt
+rate_xblock.egg-info/dependency_links.txt
+rate_xblock.egg-info/entry_points.txt
+rate_xblock.egg-info/requires.txt
+rate_xblock.egg-info/top_level.txt
