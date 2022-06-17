@@ -1,0 +1,9 @@
+/* CSS for RatingXBlock */
+
+.ratingxblock_block .count {
+    font-weight: bold;
+}
+
+.ratingxblock_block p {
+    cursor: pointer;
+}
