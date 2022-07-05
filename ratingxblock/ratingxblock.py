@@ -18,8 +18,8 @@ class RatingXBlock(XBlock):
 
     prompts = List(
         default=[
-            {'freeform': "Please provide us feedback on this course",
-             'likert': "Please rate your overall experience with this course"}
+            {'freeform': "Nhận xét",
+             'likert': "Chọn để đánh giá khoá học"}
         ],
         scope=Scope.settings,
         help="Freeform user prompt",
@@ -60,7 +60,7 @@ class RatingXBlock(XBlock):
 
     display_name = String(
         display_name="Display Name",
-        default="Provide Feedback",
+        default="Đánh giá khoá học",
         scopde=Scope.settings
     )
 
@@ -92,9 +92,8 @@ class RatingXBlock(XBlock):
 
         _ = self.runtime.service(self, 'i18n').ugettext
         prompt = {
-            'freeform': _("Please provide us feedback on this section."),
-            'likert': _("Please rate your overall experience "
-                        "with this section."),
+            'freeform': _("Nhận xét"),
+            'likert': _("Chọn để đánh giá khoá học"),
             'mouseovers': [_("Poor"),
                            _("Fair"),
                            _("Average"),
@@ -126,10 +125,11 @@ class RatingXBlock(XBlock):
         html = self.resource_string("static/html/rate.html")
         # The replace allows us to format the HTML nicely without getting
         # extra whitespace
-        if self.vote_aggregate and self.is_staff():
-            scale_item = self.resource_string("static/html/staff_item.html")
-        else:
-            scale_item = self.resource_string("static/html/scale_item.html")
+        # if self.vote_aggregate and self.is_staff():
+        #     scale_item = self.resource_string("static/html/staff_item.html")
+        # else:
+        #     scale_item = self.resource_string("static/html/scale_item.html")
+        scale_item = self.resource_string("static/html/scale_item.html")
         scale_item = scale_item.replace('\n', '')
         indexes = list(range(len(prompt['icons'])))
         active_vote = ["checked" if i == self.user_vote else ""
@@ -141,11 +141,9 @@ class RatingXBlock(XBlock):
             (l, icon, i, a, v) in
             zip(prompt['mouseovers'], prompt['icons'], indexes, active_vote, votes)
         )
-        total_view_html = self.resource_string("static/html/ratingxblock.html")
-        scale += total_view_html.format(total_reviews=self.total_reviews, total_votes=self.total_votes)
         if self.user_vote != -1:
             _ = self.runtime.service(self, 'i18n').ugettext
-            response = _("Thank you for voting!")
+            response = _("Bạn đã đánh giá khoá học!")
         else:
             response = ""
         rendered = html.format(self=self,
@@ -174,17 +172,50 @@ class RatingXBlock(XBlock):
         frag.initialize_js('RatingXBlock')
         return frag
 
-    def studio_view(self, context):
-        """
-        Create a fragment used to display the edit view in the Studio.
-        """
-        html_str = self.resource_string("static/html/studio_view.html")
-        prompt = self.get_prompt(0)
-        frag = Fragment(str(html_str).format(**prompt))
-        js_str = self.resource_string("static/js/src/studio.js")
-        frag.add_javascript(str(js_str))
+    def show_feedback(self, context=None):
+
+        if self.prompt_choice < 0 or self.prompt_choice >= len(self.prompts):
+            self.prompt_choice = random.randint(0, len(self.prompts) - 1)
+        prompt = self.get_prompt()
+
+        html = self.resource_string("static/html/show_feedback.html")
+
+        scale_item = self.resource_string("static/html/scale_item.html")
+        scale_item = scale_item.replace('\n', '')
+        indexes = list(range(len(prompt['icons'])))
+        active_vote = ["checked" if i == self.user_vote else ""
+                       for i in indexes]
+        self.init_vote_aggregate()
+        votes = self.vote_aggregate
+        scale = "".join(
+            scale_item.format(level=l, icon=icon, i=i, active=a, votes=v) for
+            (l, icon, i, a, v) in
+            zip(prompt['mouseovers'], prompt['icons'], indexes, active_vote, votes)
+        )
+        total_view_html = self.resource_string("static/html/ratingxblock.html")
+        if self.user_vote != -1:
+            _ = self.runtime.service(self, 'i18n').ugettext
+            response = _("Bạn đã đánh giá khoá học!")
+        else:
+            response = ""
+        rendered = html.format(self=self,
+                               scale=scale,
+                               total_view_html=total_view_html)
+
+
+        if self.p_user == -1:
+            self.p_user = random.uniform(0, 100)
+        if self.p_user < self.p:
+            frag = Fragment(rendered)
+        else:
+            frag = Fragment("")
+
+        # Finally, we do the standard JS+CSS boilerplate. Honestly, XBlocks
+        frag.add_css(self.resource_string("static/css/ratingxblock.css"))
+        frag.add_javascript(self.resource_string("static/js/src/rate.js"))
         frag.initialize_js('RatingXBlock')
         return frag
+
 
     # TO-DO: change this to create the scenarios you'd like to see in the
     # workbench while developing your XBlock.
@@ -261,14 +292,14 @@ class RatingXBlock(XBlock):
 
         if 'freeform' not in data and 'vote' not in data or data['vote'] == -1:
             response = {"success": True,
-                        "response": _("Please vote!")}
+                        "response": _("Bạn chưa đánh giá khoá học!")}
             self.runtime.publish(self,
                                  'edx.ratexblock.nothing_provided',
                                  {})
             return response
         if 'freeform' in data:
             response = {"success": True,
-                        "response": _("Thank you for your feedback!")}
+                        "response": _("Bạn đã đánh giá khoá học!")}
             self.runtime.publish(self,
                                  'edx.ratexblock.freeform_provided',
                                  {'old_freeform': self.user_freeform,
@@ -281,7 +312,7 @@ class RatingXBlock(XBlock):
             
         if 'vote' in data:
             response = {"success": True,
-                        "response": _("Thank you for voting!")}
+                        "response": _("Bạn đã đánh giá khoá học!")}
             self.runtime.publish(self,
                          'edx.ratexblock.likert_provided',
                          {'old_vote': self.user_vote,
