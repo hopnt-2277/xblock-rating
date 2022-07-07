@@ -74,6 +74,8 @@ class RatingXBlock(XBlock):
         help="How user review. 0 if didn't review"
     )
 
+    avg_rating = Float(default=0, scope=Scope.user_state_summary)
+
 
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
@@ -125,27 +127,24 @@ class RatingXBlock(XBlock):
         html = self.resource_string("static/html/rate.html")
         # The replace allows us to format the HTML nicely without getting
         # extra whitespace
-        # if self.vote_aggregate and self.is_staff():
-        #     scale_item = self.resource_string("static/html/staff_item.html")
-        # else:
-        #     scale_item = self.resource_string("static/html/scale_item.html")
         scale_item = self.resource_string("static/html/scale_item.html")
         scale_item = scale_item.replace('\n', '')
-        indexes = list(range(len(prompt['icons'])))
+        indexes = list(range(5))
         active_vote = ["checked" if i == self.user_vote else ""
                        for i in indexes]
         self.init_vote_aggregate()
         votes = self.vote_aggregate
         scale = "".join(
-            scale_item.format(level=l, icon=icon, i=i, active=a, votes=v) for
-            (l, icon, i, a, v) in
-            zip(prompt['mouseovers'], prompt['icons'], indexes, active_vote, votes)
+            scale_item.format(i=i, active=a, votes=v) for
+            (i, a, v) in
+            zip(indexes, active_vote, votes)
         )
+        scale = "<div class='star'>" + scale + "</div>"
         if self.user_vote != -1:
             _ = self.runtime.service(self, 'i18n').ugettext
             response = _("Bạn đã đánh giá khoá học!")
         else:
-            response = ""
+            response = "Vui lòng đánh giá khoá học!"
         rendered = html.format(self=self,
                                scale=scale,
                                freeform_prompt=prompt['freeform'],
@@ -168,6 +167,7 @@ class RatingXBlock(XBlock):
         # Finally, we do the standard JS+CSS boilerplate. Honestly, XBlocks
         # ought to have a sane default here.
         frag.add_css(self.resource_string("static/css/ratingxblock.css"))
+        frag.add_css_url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css")
         frag.add_javascript(self.resource_string("static/js/src/rate.js"))
         frag.initialize_js('RatingXBlock')
         return frag
@@ -192,12 +192,10 @@ class RatingXBlock(XBlock):
             (l, icon, i, a, v) in
             zip(prompt['mouseovers'], prompt['icons'], indexes, active_vote, votes)
         )
+        scale = "<div> AVG RATING: "+ str(self.avg_rating) +"</div>"+ "<div> TOTAL REVIEW: "+ str(self.total_reviews) +"</div>" + "<div class='star'>" + scale + "</div>"
+
         total_view_html = self.resource_string("static/html/ratingxblock.html")
-        if self.user_vote != -1:
-            _ = self.runtime.service(self, 'i18n').ugettext
-            response = _("Bạn đã đánh giá khoá học!")
-        else:
-            response = ""
+
         rendered = html.format(self=self,
                                scale=scale,
                                total_view_html=total_view_html)
@@ -212,6 +210,7 @@ class RatingXBlock(XBlock):
 
         # Finally, we do the standard JS+CSS boilerplate. Honestly, XBlocks
         frag.add_css(self.resource_string("static/css/ratingxblock.css"))
+        frag.add_css_url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css")
         frag.add_javascript(self.resource_string("static/js/src/rate.js"))
         frag.initialize_js('RatingXBlock')
         return frag
@@ -256,7 +255,10 @@ class RatingXBlock(XBlock):
         if self.user_vote != -1:
             self.vote_aggregate[self.user_vote] -= 1
         if data['vote'] != -1 and self.user_vote == -1:
+            self.avg_rating = (self.avg_rating * self.total_votes + data['vote']) / (self.total_votes + 1)
             self.total_votes += 1
+        else:
+            self.avg_rating = (self.avg_rating * self.total_votes - self.user_vote + data['vote']) / self.total_votes
 
         self.user_vote = data['vote']
         self.vote_aggregate[self.user_vote] += 1
@@ -299,7 +301,7 @@ class RatingXBlock(XBlock):
             return response
         if 'freeform' in data:
             response = {"success": True,
-                        "response": _("Bạn đã đánh giá khoá học!")}
+                        "response": _("Đánh giá khoá học thành công!")}
             self.runtime.publish(self,
                                  'edx.ratexblock.freeform_provided',
                                  {'old_freeform': self.user_freeform,
@@ -312,7 +314,7 @@ class RatingXBlock(XBlock):
             
         if 'vote' in data:
             response = {"success": True,
-                        "response": _("Bạn đã đánh giá khoá học!")}
+                        "response": _("Đánh giá khoá học thành công!")}
             self.runtime.publish(self,
                          'edx.ratexblock.likert_provided',
                          {'old_vote': self.user_vote,
@@ -329,3 +331,7 @@ class RatingXBlock(XBlock):
         # response['flag'] = self.student_view()
 
         return response
+
+
+
+    

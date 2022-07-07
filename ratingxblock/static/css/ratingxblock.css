@@ -7,3 +7,12 @@
 .ratingxblock_block p {
     cursor: pointer;
 }
+
+.fa.fa-star.checked ~ span:before {
+  color: black;
+}
+
+.fa.fa-star {
+  cursor: pointer; 
+  color: orange;
+}
