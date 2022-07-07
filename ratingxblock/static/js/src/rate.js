@@ -17,10 +17,11 @@ function RatingXBlock(runtime, element) {
     $(".rate_submit_feedback", element).click(function(eventObject) {
 	var freeform = $(".rate_freeform_area", element).val();
 	var vote = 0;
-	if ($(".rate_radio:checked", element).length === 0) {
+
+	if ($(".fa.fa-star.checked", element).length === 0) {
 	    vote = -1;
 	} else {
-	    vote = parseInt($(".rate_radio:checked", element).attr("id").split("_")[1]);
+	    vote = parseInt($(".fa.fa-star").index($(".fa.fa-star.checked")));
 	}
 	var feedback = {"freeform": freeform, 
 		    "vote": vote};
@@ -33,16 +34,18 @@ function RatingXBlock(runtime, element) {
         });
     });
 
-    $('.rate_radio', element).change(function(eventObject) {
-	var target_id = eventObject.target.id;
-	var vote = parseInt(target_id.split('_')[1]);
-	Logger.log("edx.ratexblock.likert_clicked", {"vote":vote});
-    });
+	activeVote()
 
-    $('.rate_freeform_area', element).change(function(eventObject) {
-	var freeform = eventObject.currentTarget.value;
-	Logger.log("edx.ratexblock.freeform_changed", {"freeform":freeform});
-    });
+    // $('.rate_radio', element).change(function(eventObject) {
+	// var target_id = eventObject.target.id;
+	// var vote = parseInt(target_id.split('_')[1]);
+	// Logger.log("edx.ratexblock.likert_clicked", {"vote":vote});
+    // });
+
+    // $('.rate_freeform_area', element).change(function(eventObject) {
+	// var freeform = eventObject.currentTarget.value;
+	// Logger.log("edx.ratexblock.freeform_changed", {"freeform":freeform});
+    // });
 
 }
 
@@ -52,3 +55,14 @@ function updateRating(data) {
 	
 }
 
+
+
+function activeVote() {
+	$(document).on('click', '.fa.fa-star', function() {
+		let parentItem = $(this).parents('.star');
+		parentItem.find('.fa.fa-star').removeClass('checked');
+		$(this).addClass('checked');
+
+	})
+
+}
