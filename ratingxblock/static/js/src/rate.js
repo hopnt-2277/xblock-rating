@@ -34,7 +34,8 @@ function RatingXBlock(runtime, element) {
         });
     });
 
-	activeVote()
+	activeVote();
+	activeStar()
 
     // $('.rate_radio', element).change(function(eventObject) {
 	// var target_id = eventObject.target.id;
@@ -52,17 +53,24 @@ function RatingXBlock(runtime, element) {
 
 function updateRating(data) {
 	$('.rate_thank_you').text(data.response);
-	
 }
-
 
 
 function activeVote() {
 	$(document).on('click', '.fa.fa-star', function() {
 		let parentItem = $(this).parents('.star');
+		parentItem.addClass('selected')
 		parentItem.find('.fa.fa-star').removeClass('checked');
 		$(this).addClass('checked');
-
 	})
+}
 
+function activeStar() {
+	$('.star').each(function() {
+		if($(this).find('.fa.fa-star.checked').length > 0) {
+			$(this).addClass('selected')
+		} else {
+			$(this).removeClass('selected')
+		}
+	})
 }
