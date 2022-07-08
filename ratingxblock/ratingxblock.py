@@ -255,10 +255,10 @@ class RatingXBlock(XBlock):
         if self.user_vote != -1:
             self.vote_aggregate[self.user_vote] -= 1
         if data['vote'] != -1 and self.user_vote == -1:
-            self.avg_rating = (self.avg_rating * self.total_votes + data['vote']) / (self.total_votes + 1)
+            self.avg_rating = (self.avg_rating * self.total_votes + (data['vote'] + 1)) / (self.total_votes + 1)
             self.total_votes += 1
         else:
-            self.avg_rating = (self.avg_rating * self.total_votes - self.user_vote + data['vote']) / self.total_votes
+            self.avg_rating = (self.avg_rating * self.total_votes - (self.user_vote + 1) + (data['vote'] + 1)) / self.total_votes
 
         self.user_vote = data['vote']
         self.vote_aggregate[data['vote']] += 1
