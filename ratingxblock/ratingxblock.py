@@ -65,17 +65,16 @@ class RatingXBlock(XBlock):
     )
 
     total_reviews = Integer(
-        default=0, scope=Scope.user_state,
-        help="How user review. 0 if didn't review"
+        default=0, scope=Scope.user_state_summary,
+        help="total user review. 0 if didn't review"
     )
 
     total_votes = Integer(
-        default=0, scope=Scope.user_state,
-        help="How user review. 0 if didn't review"
+        default=0, scope=Scope.user_state_summary,
+        help="total user vote. 0 if didn't vote"
     )
 
     avg_rating = Float(default=0, scope=Scope.user_state_summary)
-
 
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
@@ -107,8 +106,6 @@ class RatingXBlock(XBlock):
         prompt.update(self.prompts[index])
         return prompt
 
-
-
     def student_view(self, context=None):
         """
         The primary view of the RateXBlock, shown to students
@@ -132,7 +129,10 @@ class RatingXBlock(XBlock):
         indexes = list(range(5))
         active_vote = ["checked" if i == self.user_vote else ""
                        for i in indexes]
+
         self.init_vote_aggregate()
+        # init avg, total vote, total review, vote arr
+        
         votes = self.vote_aggregate
         scale = "".join(
             scale_item.format(i=i, active=a, votes=v) for
@@ -215,7 +215,6 @@ class RatingXBlock(XBlock):
         frag.initialize_js('RatingXBlock')
         return frag
 
-
     # TO-DO: change this to create the scenarios you'd like to see in the
     # workbench while developing your XBlock.
     @staticmethod
@@ -239,15 +238,16 @@ class RatingXBlock(XBlock):
         if not self.vote_aggregate:
             self.vote_aggregate = [0] * (len(self.get_prompt()['mouseovers']))
 
-
     def vote(self, data):
         """
         Handle voting
         """
         # prompt_choice is initialized by student view.
         # Ideally, we'd break this out into a function.
-        prompt = self.get_prompt(self.prompt_choice)
+        if self.user_vote == data['vote']:
+            return
 
+        prompt = self.get_prompt(self.prompt_choice)
         # Make sure we're initialized
         self.init_vote_aggregate()
 
@@ -261,7 +261,7 @@ class RatingXBlock(XBlock):
             self.avg_rating = (self.avg_rating * self.total_votes - self.user_vote + data['vote']) / self.total_votes
 
         self.user_vote = data['vote']
-        self.vote_aggregate[self.user_vote] += 1
+        self.vote_aggregate[data['vote']] += 1
     
     def is_staff(self):
         """
@@ -278,7 +278,6 @@ class RatingXBlock(XBlock):
             # In workbench and similar settings, always return true
             return True
 
-
     @XBlock.json_handler
     def feedback(self, data, suffix=''):
         '''
@@ -292,7 +291,7 @@ class RatingXBlock(XBlock):
         '''
         _ = self.runtime.service(self, 'i18n').ugettext
 
-        if 'freeform' not in data and 'vote' not in data or data['vote'] == -1:
+        if 'vote' not in data or data['vote'] == -1:
             response = {"success": True,
                         "response": _("Bạn chưa đánh giá khoá học!")}
             self.runtime.publish(self,
@@ -326,8 +325,7 @@ class RatingXBlock(XBlock):
             "vote": self.user_vote
         })
 
-        if self.is_staff():
-            response['aggregate'] = self.vote_aggregate
+        response['aggregate'] = self.vote_aggregate
         # response['flag'] = self.student_view()
 
         return response
