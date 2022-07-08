@@ -8,7 +8,8 @@
     cursor: pointer;
 }
 
-.fa.fa-star.checked ~ span:before {
+.fa.fa-star.checked ~ .fa.fa-star:before,
+.star:not(.selected) span {
   color: black;
 }
 

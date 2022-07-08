@@ -76,6 +76,8 @@ class RatingXBlock(XBlock):
 
     avg_rating = Float(default=0, scope=Scope.user_state_summary)
 
+    total = Float(default=0, scope=Scope.user_state_summary)
+
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
@@ -254,12 +256,15 @@ class RatingXBlock(XBlock):
         # Remove old vote if we voted before
         if self.user_vote != -1:
             self.vote_aggregate[self.user_vote] -= 1
+            self.total = self.total - self.user_vote + data['vote']
+        else:
+            self.total = self.total + data['vote'] + 1
         if data['vote'] != -1 and self.user_vote == -1:
             self.avg_rating = (self.avg_rating * self.total_votes + (data['vote'] + 1)) / (self.total_votes + 1)
             self.total_votes += 1
         else:
             self.avg_rating = (self.avg_rating * self.total_votes - (self.user_vote + 1) + (data['vote'] + 1)) / self.total_votes
-
+        
         self.user_vote = data['vote']
         self.vote_aggregate[data['vote']] += 1
     
