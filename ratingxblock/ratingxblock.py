@@ -6,6 +6,8 @@ import pkg_resources
 from web_fragments.fragment import Fragment
 from xblock.core import XBlock
 from xblock.fields import Integer, Scope, String, List, Float
+from django.http import Http404, HttpResponse, HttpResponseNotFound, StreamingHttpResponse
+
 
 @XBlock.needs('i18n')
 class RatingXBlock(XBlock):
