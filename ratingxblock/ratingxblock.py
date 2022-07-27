@@ -1,6 +1,7 @@
 """TO-DO: Write a description of what this XBlock is."""
 
 import random
+from unittest.util import _MAX_LENGTH
 
 import pkg_resources
 from web_fragments.fragment import Fragment
@@ -58,7 +59,7 @@ class RatingXBlock(XBlock):
     )
 
     user_freeform = String(default="", scope=Scope.user_state,
-                           help="Feedback")
+                           help="Feedback", max_length=2)
 
     display_name = String(
         display_name="Display Name",
@@ -97,8 +98,8 @@ class RatingXBlock(XBlock):
 
         _ = self.runtime.service(self, 'i18n').ugettext
         prompt = {
-            'freeform': _("Nhận xét"),
-            'likert': _("Chọn để đánh giá khoá học"),
+            'freeform': "Nhận xét",
+            'likert': "Chọn để đánh giá khoá học",
             'mouseovers': [_("Poor"),
                            _("Fair"),
                            _("Average"),

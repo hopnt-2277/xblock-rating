@@ -1,15 +1,15 @@
 <div class="rate_block">
     <form action="" onsubmit="return false;">
-    <fieldset class="rate_likert_field">
+    <fieldset class="rate_likert_field" style="margin-top:10px">
     <legend class="rate_likert_header">{likert_prompt}</legend>
     <div class="rate_likert_scale">{scale}</div>
     </fieldset>
     <!-- <label class="rate_header" for="rate_freeform_textarea">{freeform_prompt}</label> -->
     <div class="rate_freeform_input">
-      <textarea id="rate_freeform_textarea" class="rate_freeform_area" placeholder="{freeform_prompt}" rows="4" cols="30">{self.user_freeform}</textarea>
-      <div class="rate_thank_you" aria-live=polite>{response}</div>
+      <textarea id="rate_freeform_textarea" class="rate_freeform_area" placeholder="{freeform_prompt}" rows="4" cols="30" maxlength="1000" style="height:100px; width:300px">{self.user_freeform}</textarea>
+      <div class="rate_thank_you" aria-live=polite style="font-size:10px">{response}</div>
     </div>
-    <button type="submit" class="rate_submit_feedback"> Gửi đánh giá </button>
+    <button type="submit" class="rate_submit_feedback" style="margin-top:10px"> Gửi đánh giá </button>
     </form>
 </div>
 
