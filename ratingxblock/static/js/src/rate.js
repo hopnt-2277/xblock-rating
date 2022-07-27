@@ -15,7 +15,7 @@ function RatingXBlock(runtime, element) {
     var feedback_handler = runtime.handlerUrl(element, 'feedback');
 
     $(".rate_submit_feedback", element).click(function(eventObject) {
-	var freeform = $(".rate_freeform_area", element).val();
+	var freeform = $(".rate_freeform_area", element).val().trim();
 	var vote = 0;
 
 	if ($(".fa.fa-star.checked", element).length === 0) {

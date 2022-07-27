@@ -1,11 +1,14 @@
 """TO-DO: Write a description of what this XBlock is."""
 
 import random
+from unittest.util import _MAX_LENGTH
 
 import pkg_resources
 from web_fragments.fragment import Fragment
 from xblock.core import XBlock
 from xblock.fields import Integer, Scope, String, List, Float
+from django.http import Http404, HttpResponse, HttpResponseNotFound, StreamingHttpResponse
+
 
 @XBlock.needs('i18n')
 class RatingXBlock(XBlock):
@@ -56,7 +59,7 @@ class RatingXBlock(XBlock):
     )
 
     user_freeform = String(default="", scope=Scope.user_state,
-                           help="Feedback")
+                           help="Feedback", max_length=1000)
 
     display_name = String(
         display_name="Display Name",
@@ -95,8 +98,8 @@ class RatingXBlock(XBlock):
 
         _ = self.runtime.service(self, 'i18n').ugettext
         prompt = {
-            'freeform': _("Nhận xét"),
-            'likert': _("Chọn để đánh giá khoá học"),
+            'freeform': "Nhận xét",
+            'likert': "Chọn để đánh giá khoá học",
             'mouseovers': [_("Poor"),
                            _("Fair"),
                            _("Average"),
