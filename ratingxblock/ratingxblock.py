@@ -59,7 +59,7 @@ class RatingXBlock(XBlock):
     )
 
     user_freeform = String(default="", scope=Scope.user_state,
-                           help="Feedback", max_length=2)
+                           help="Feedback", max_length=1000)
 
     display_name = String(
         display_name="Display Name",
