@@ -1,0 +1,19 @@
+/* CSS for RatingXBlock */
+
+.ratingxblock_block .count {
+    font-weight: bold;
+}
+
+.ratingxblock_block p {
+    cursor: pointer;
+}
+
+.fa.fa-star.checked ~ .fa.fa-star:before,
+.star:not(.selected) span {
+  color: black;
+}
+
+.fa.fa-star {
+  cursor: pointer; 
+  color: orange;
+}
