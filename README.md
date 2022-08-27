@@ -12,7 +12,9 @@ sudo -H -u edxapp bash
 
 source /edx/app/edxapp/edxapp_env
 
-pip install git+https://github.com/framgia/MOOC_General.git@ratingxblock-master
+git clone --single-branch --branch ratingxblock-master git@github3.com:framgia/MOOC_General.git
+
+pip install /edx/app/edxapp/ratingxblock
 
 # To uninstall the xblock
 
